@@ -1,0 +1,20 @@
+{
+  "name": "minecraft-manager",
+  "version": "1.0.0",
+  "description": "Discord Whitelist Bot & Lightweight Admin Web Panel for Fabric Minecraft Server",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "discord.js": "14.18.0",
+    "express": "5.1.0",
+    "rcon-client": "4.2.5"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "author": "hawklab",
+  "license": "MIT"
+}

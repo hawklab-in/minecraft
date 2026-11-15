@@ -1,0 +1,60 @@
+services:
+  minecraft:
+    image: itzg/minecraft-server:java25
+    container_name: minecraft
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+    ports:
+      - "25565:25565"
+    environment:
+      TYPE: "FABRIC"
+      VERSION: "${MC_VERSION:-LATEST}"
+      EULA: "TRUE"
+      MEMORY: "${MEMORY:-8G}"
+      TZ: "${TZ:-Asia/Kolkata}"
+      USE_AIKAR_FLAGS: "${USE_AIKAR_FLAGS:-true}"
+      MODRINTH_PROJECTS: "${MODRINTH_PROJECTS:-fabric-api, lithium, ferrite-core, spark, bluemap, no-chat-reports}"
+      MODRINTH_DOWNLOAD_DEPENDENCIES: "${MODRINTH_DOWNLOAD_DEPENDENCIES:-required}"
+      MODRINTH_ALLOWED_VERSION_TYPE: "${MODRINTH_ALLOWED_VERSION_TYPE:-release}"
+      ONLINE_MODE: "${ONLINE_MODE:-FALSE}"
+      ENABLE_WHITELIST: "${ENABLE_WHITELIST:-TRUE}"
+      ENFORCE_WHITELIST: "${ENFORCE_WHITELIST:-TRUE}"
+      ENABLE_RCON: "true"
+      RCON_PORT: 25575
+      RCON_PASSWORD: "${RCON_PASSWORD}"
+    volumes:
+      - mc-data:/data
+    healthcheck:
+      test: ["CMD", "mc-health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 180s
+
+  manager:
+    build:
+      context: ./manager
+      dockerfile: Dockerfile
+    container_name: minecraft-manager
+    restart: unless-stopped
+    depends_on:
+      - minecraft
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - DISCORD_GUILD_ID=${DISCORD_GUILD_ID}
+      - DISCORD_ROLE_ID=${DISCORD_ROLE_ID}
+      - RCON_HOST=minecraft
+      - RCON_PORT=25575
+      - RCON_PASSWORD=${RCON_PASSWORD}
+      - PANEL_USER=${PANEL_USER:-admin}
+      - PANEL_PASSWORD=${PANEL_PASSWORD}
+      - DATA_DIR=/data
+      - PORT=3000
+      - SERVICE_FQDN_MANAGER_3000=${PANEL_DOMAIN:-panel.hawklab.in}
+    volumes:
+      - manager-data:/data
+
+volumes:
+  mc-data:
+  manager-data:

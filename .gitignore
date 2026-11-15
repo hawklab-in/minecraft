@@ -1,0 +1,19 @@
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
+
+# Node dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Data directories (when mounted locally during dev)
+/data
+mc-data/
+manager-data/
+
+# OS files
+.DS_Store
+Thumbs.db

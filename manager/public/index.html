@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minecraft Admin Panel</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 1rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .badge-online {
+      background-color: rgba(34, 197, 94, 0.2);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+
+    .badge-offline {
+      background-color: rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+    }
+
+    .card h2 {
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .card .value {
+      font-size: 1.75rem;
+      font-weight: 700;
+    }
+
+    .actions-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    button {
+      background: var(--primary);
+      color: #0f172a;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.15s ease-in-out;
+    }
+
+    button:hover {
+      background: var(--primary-hover);
+    }
+
+    button.btn-danger {
+      background: var(--danger);
+      color: #ffffff;
+    }
+
+    button.btn-danger:hover {
+      background: var(--danger-hover);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      margin-bottom: 1.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.875rem;
+    }
+
+    th, td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .empty-state {
+      padding: 2rem;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .player-tag {
+      display: inline-flex;
+      align-items: center;
+      background: #334155;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      margin: 0.25rem;
+      font-weight: 500;
+    }
+
+    .player-tag button {
+      padding: 0.15rem 0.4rem;
+      font-size: 0.75rem;
+      margin-left: 0.5rem;
+    }
+
+    .status-toast {
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      display: none;
+      font-size: 0.875rem;
+    }
+
+    .toast-success {
+      background: rgba(34, 197, 94, 0.2);
+      border: 1px solid var(--success);
+      color: var(--success);
+    }
+
+    .toast-error {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>
+        <span>⛏️ Minecraft Panel</span>
+        <span id="server-badge" class="badge badge-offline">Offline</span>
+      </h1>
+      <div id="refresh-timer" style="font-size: 0.75rem; color: var(--text-muted);">
+        Auto-refreshes in <span id="countdown">10</span>s
+      </div>
+    </header>
+
+    <div id="toast" class="status-toast"></div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Server Version</h2>
+        <div id="val-version" class="value">--</div>
+      </div>
+      <div class="card">
+        <h2>Online Players</h2>
+        <div id="val-players" class="value">0 / --</div>
+      </div>
+      <div class="card">
+        <h2>Linked Accounts</h2>
+        <div id="val-links" class="value">0</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 1.5rem;">
+      <h2>Currently Online Players</h2>
+      <div id="online-players-list" style="margin-top: 0.5rem; min-height: 40px;">
+        <span class="empty-state">No players currently online.</span>
+      </div>
+    </div>
+
+    <div class="actions-bar">
+      <h2>Discord-to-Minecraft Links</h2>
+      <div>
+        <button id="btn-sync" onclick="syncWhitelist()">🔄 Re-sync Whitelist</button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Minecraft Username</th>
+            <th>Discord ID</th>
+            <th>Linked At</th>
+            <th style="text-align: right;">Action</th>
+          </tr>
+        </thead>
+        <tbody id="links-tbody">
+          <tr>
+            <td colspan="4" class="empty-state">Loading linked accounts...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer>
+      playmine.hawklab.in &bull; Fabric Server &bull; Hawklab
+    </footer>
+  </div>
+
+  <script>
+    let countdown = 10;
+
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'status-toast ' + (isError ? 'toast-error' : 'toast-success');
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 4000);
+    }
+
+    async function fetchStatus() {
+      try {
+        const res = await fetch('/api/status');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+
+        // Update Server Badge
+        const badge = document.getElementById('server-badge');
+        if (data.online) {
+          badge.className = 'badge badge-online';
+          badge.textContent = 'Online';
+        } else {
+          badge.className = 'badge badge-offline';
+          badge.textContent = 'Offline';
+        }
+
+        // Metrics
+        document.getElementById('val-version').textContent = data.version || '26.3';
+        document.getElementById('val-players').textContent = `${data.players.online} / ${data.players.max}`;
+        document.getElementById('val-links').textContent = data.links ? data.links.length : 0;
+
+        // Online Players
+        const playersDiv = document.getElementById('online-players-list');
+        if (data.players.list && data.players.list.length > 0) {
+          playersDiv.innerHTML = data.players.list.map(p => `
+            <span class="player-tag">
+              <span>${escapeHtml(p)}</span>
+              <button class="btn-danger" onclick="kickPlayer('${escapeHtml(p)}')">Kick</button>
+            </span>
+          `).join('');
+        } else {
+          playersDiv.innerHTML = '<span style="color: var(--text-muted); font-size: 0.875rem;">No players currently online.</span>';
+        }
+
+        // Links Table
+        const tbody = document.getElementById('links-tbody');
+        if (data.links && data.links.length > 0) {
+          tbody.innerHTML = data.links.map(l => `
+            <tr>
+              <td><strong>${escapeHtml(l.mcName)}</strong></td>
+              <td style="color: var(--text-muted); font-family: monospace;">${escapeHtml(l.discordId)}</td>
+              <td style="color: var(--text-muted);">${formatDate(l.linkedAt)}</td>
+              <td style="text-align: right;">
+                <button class="btn-danger" onclick="unlinkPlayer('${escapeHtml(l.mcName)}')">Unlink & Kick</button>
+              </td>
+            </tr>
+          `).join('');
+        } else {
+          tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No Discord users have linked accounts yet.</td></tr>';
+        }
+
+      } catch (err) {
+        document.getElementById('server-badge').className = 'badge badge-offline';
+        document.getElementById('server-badge').textContent = 'Error';
+      }
+    }
+
+    async function kickPlayer(name) {
+      if (!confirm(`Are you sure you want to kick ${name}?`)) return;
+      try {
+        const res = await fetch('/api/kick', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(`Kicked player ${name}`);
+          fetchStatus();
+        } else {
+          showToast(data.error || 'Failed to kick player', true);
+        }
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    async function unlinkPlayer(name) {
+      if (!confirm(`Are you sure you want to unlink and remove ${name} from the whitelist?`)) return;
+      try {
+        const res = await fetch('/api/unlink', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(`Unlinked ${name} successfully`);
+          fetchStatus();
+        } else {
+          showToast(data.error || 'Failed to unlink account', true);
+        }
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    async function syncWhitelist() {
+      const btn = document.getElementById('btn-sync');
+      btn.disabled = true;
+      try {
+        const res = await fetch('/api/sync', { method: 'POST' });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(data.message || 'Whitelist synchronized successfully');
+          fetchStatus();
+        } else {
+          showToast(data.error || 'Sync failed', true);
+        }
+      } catch (err) {
+        showToast(err.message, true);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+      }[tag] || tag));
+    }
+
+    function formatDate(isoStr) {
+      if (!isoStr) return '--';
+      try {
+        const d = new Date(isoStr);
+        return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } catch (_) {
+        return isoStr;
+      }
+    }
+
+    // Refresh Loop
+    setInterval(() => {
+      countdown--;
+      if (countdown <= 0) {
+        countdown = 10;
+        fetchStatus();
+      }
+      document.getElementById('countdown').textContent = countdown;
+    }, 1000);
+
+    // Initial load
+    fetchStatus();
+  </script>
+</body>
+</html>
